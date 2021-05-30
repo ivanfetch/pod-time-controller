@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	fs := flag.NewFlagSet("funsized-url", flag.ExitOnError)
+	fs := flag.NewFlagSet("pod-time-controller", flag.ExitOnError)
 	fs.SetOutput(os.Stderr)
 
 	debug := fs.Bool("debug", false, "Enable debug logging")
