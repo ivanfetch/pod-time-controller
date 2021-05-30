@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	err := podTimeController.Run()
+	var controller podTimeController.Controller
+	err := controller.Run("./kubeconfig")
 	if err != nil {
 		log.Fatalf("%v", err.Error())
 	}

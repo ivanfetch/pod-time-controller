@@ -8,7 +8,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-func handleAddPod(object interface{}) {
+func (c Controller) handleAddPod(object interface{}) {
 	// Type-assert the interface to a Pod, to avoid potentially panicing?
 	pod, valid := object.(*v1.Pod)
 	if !valid {
@@ -19,7 +19,7 @@ func handleAddPod(object interface{}) {
 	return
 }
 
-func handleDeletePod(object interface{}) {
+func (c Controller) handleDeletePod(object interface{}) {
 	// Type-assert the interface to a Pod, to avoid potentially panicing?
 	pod, valid := object.(*v1.Pod)
 	if !valid {
@@ -30,7 +30,7 @@ func handleDeletePod(object interface{}) {
 	return
 }
 
-func handleUpdatePod(oldObject, newObject interface{}) {
+func (c Controller) handleUpdatePod(oldObject, newObject interface{}) {
 	// Type-assert the interface to a Pod, to avoid potentially panicing?
 	// It doesn't matter what the pre-updated object was, in this case.
 	pod, valid := newObject.(*v1.Pod)
