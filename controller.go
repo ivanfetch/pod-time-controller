@@ -144,10 +144,11 @@ func (c *Controller) processNextQueueItem() bool {
 // annotatePod accepts a namespace name and pod name, adding the
 // `timeAnnotationName` annotation to that pod.
 func (c Controller) annotatePod(podNamespace, podName string) error {
-	log.Infof("Annotating namespace %q, pod %q", podNamespace, podName)
+	timeStamp := time.Now().Format(time.RFC3339)
+	log.Infof("Annotating namespace %q, pod %q with timestamp %s", podNamespace, podName, timeStamp)
 	podPatch := fmt.Sprintf(`{"metadata":{"annotations":{"%s":"%s"}}}`,
 		timeAnnotationName,
-		time.Now().Format(time.RFC3339))
+		timeStamp)
 	log.Debugf("patch for pod %s/%s is: %v", podNamespace, podName, podPatch)
 
 	_, err := c.kubeClient.CoreV1().Pods(podNamespace).Patch(context.TODO(), podName, types.StrategicMergePatchType, []byte(podPatch), metav1.PatchOptions{})
