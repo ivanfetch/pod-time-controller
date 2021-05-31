@@ -1,0 +1,5 @@
+This controller operates on pods that have the annotation `addtime` set to any value. Such pods will have an annotation `timestamp` added.
+
+See logs from this controller by looking at its pod logs:
+  kubectl logs --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "pod-time-controller.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
