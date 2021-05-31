@@ -8,7 +8,7 @@ import (
 )
 
 func (c *Controller) handleAddPod(object interface{}) {
-	// Type-assert the interface to a Pod, to avoid potentially panicing?
+	// Type-assert the interface to a Pod, to avoid potentially panicing.
 	pod, valid := object.(*v1.Pod)
 	if !valid {
 		log.Errorf("Error converting object to a Pod: %+V\n", object)
@@ -16,12 +16,12 @@ func (c *Controller) handleAddPod(object interface{}) {
 	}
 	log.Debugf("new pod %s\n", pod.Name)
 
-	if hasAnnotation(pod, triggerAnnotation) && !hasAnnotation(pod, timeAnnotationName) {
+	if hasAnnotation(pod, triggerAnnotationName) && !hasAnnotation(pod, timeAnnotationName) {
 		key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(object)
 		if err != nil {
 			log.Errorf("Error making key for pod object %v: %v\n", pod.Name, err)
 		} else {
-			log.Infof("pod added: adding key %v to queue\n", key)
+			log.Infof("pod added: adding key to queue: %v", key)
 			c.queue.Add(key)
 		}
 	}
@@ -29,7 +29,7 @@ func (c *Controller) handleAddPod(object interface{}) {
 }
 
 func (c *Controller) handleDeletePod(object interface{}) {
-	// Type-assert the interface to a Pod, to avoid potentially panicing?
+	// Type-assert the interface to a Pod, to avoid potentially panicing.
 	pod, valid := object.(*v1.Pod)
 	if !valid {
 		log.Errorf("Error converting object to a Pod: %+V\n", object)
@@ -40,7 +40,7 @@ func (c *Controller) handleDeletePod(object interface{}) {
 	if err != nil {
 		log.Errorf("Error making key for pod object %v: %v\n", pod.Name, err)
 	} else {
-		log.Infof("attempting to remove key %v from queue\n", key)
+		log.Infof("attempting to remove key from queue: %v", key)
 		c.queue.Forget(key)
 		c.queue.Done(key)
 	}
@@ -48,7 +48,7 @@ func (c *Controller) handleDeletePod(object interface{}) {
 }
 
 func (c *Controller) handleUpdatePod(oldObject, newObject interface{}) {
-	// Type-assert the interface to a Pod, to avoid potentially panicing?
+	// Type-assert the interface to a Pod, to avoid potentially panicing.
 	// It doesn't matter what the pre-updated object was, in this case, so use
 	// the new object.
 	pod, valid := newObject.(*v1.Pod)
@@ -58,12 +58,12 @@ func (c *Controller) handleUpdatePod(oldObject, newObject interface{}) {
 	}
 	log.Debugf("updated pod %s\n", pod.Name)
 
-	if hasAnnotation(pod, triggerAnnotation) && !hasAnnotation(pod, timeAnnotationName) {
+	if hasAnnotation(pod, triggerAnnotationName) && !hasAnnotation(pod, timeAnnotationName) {
 		key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(newObject)
 		if err != nil {
 			log.Errorf("Error making key for pod object %v: %v\n", pod.Name, err)
 		} else {
-			log.Infof("pod updated: adding key %v to queue\n", key)
+			log.Infof("pod updated: adding key to queue: %v", key)
 			c.queue.Add(key)
 		}
 	}

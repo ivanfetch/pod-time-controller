@@ -34,14 +34,16 @@ var Version string = "unknown"
 var GitCommit string = "unknown"
 
 const (
-	triggerAnnotation  = "addtime"   // Annotation required to exist for the controller to annotate pods.
-	timeAnnotationName = "timestamp" // Annotation to add to pods
-	maxQueueRetries    = 5           // max requeues for an item that fails to be patched
+	triggerAnnotationName = "addtime"   // Annotation required to exist for the controller to annotate pods.
+	timeAnnotationName    = "timestamp" // Annotation to add to pods
+	maxQueueRetries       = 5           // max requeues for an item that fails to be patched
 )
 
 // Run initializes and executes the controller loop.
 func (c *Controller) Run(kubeConfigPath string) error {
 	log.SetOutput(os.Stdout)
+
+	log.Infof("pod time controller starting - pods with the %s annotation, will be annotated with %s set to the current date and time", triggerAnnotationName, timeAnnotationName)
 
 	err := c.createKubeClient(kubeConfigPath)
 	if err != nil {
@@ -84,8 +86,8 @@ func (c *Controller) Run(kubeConfigPath string) error {
 	return nil
 }
 
-// runWorker loops to process items on the queue until the queue ias no more
-// items.
+// runWorker loops to process items on the queue until the queue determins it
+// must be shutdown, via the channel.
 func (c *Controller) runWorker() {
 	for c.processNextQueueItem() {
 		// processNextQueueItem() does the work, here we keep looping. . .
@@ -140,9 +142,9 @@ func (c *Controller) processNextQueueItem() bool {
 }
 
 // annotatePod accepts a namespace name and pod name, adding the
-// timeAnnotationName annotation to that pod.
+// `timeAnnotationName` annotation to that pod.
 func (c Controller) annotatePod(podNamespace, podName string) error {
-	log.Infof("Adding annotation to namespace %q, pod %q", podNamespace, podName)
+	log.Infof("Annotating namespace %q, pod %q", podNamespace, podName)
 	podPatch := fmt.Sprintf(`{"metadata":{"annotations":{"%s":"%s"}}}`,
 		timeAnnotationName,
 		time.Now().Format(time.RFC3339))
@@ -156,6 +158,9 @@ func (c Controller) annotatePod(podNamespace, podName string) error {
 	return nil
 }
 
+// createSignalHandler creates a channel that the Kubernetes Informer and
+// controller worker queue will use to determine when they need to shutdown.
+// This channel will also be impacted if a signal is received (SIGTERM).
 func createSignalHandler() (stopChannel <-chan struct{}) {
 	stop := make(chan struct{})
 	// Create another channel that receives SIGTERM and SIGINT signals and triggers cleanup and exit.

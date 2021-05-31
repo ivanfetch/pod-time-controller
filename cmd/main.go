@@ -1,3 +1,4 @@
+// Command-line interface for the pod time controller.
 package main
 
 import (
