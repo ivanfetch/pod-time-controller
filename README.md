@@ -10,7 +10,7 @@ This is my foray into using Go for Kubernetes programming, and this project curr
 
 So far I find the Kubernetes related GO packages are slower to learn, as there are abstractions upon abstractions, and many Go Interfaces passed between functions.
 
-### Example Output
+## Example Output
 
 Logs from within Kubernetes will have full log timestamps instead of the below time offsets since the program was started.
 
@@ -40,6 +40,43 @@ Next the controller detects the deleted pods which were recycled by the Deployme
 INFO[0031] attempting to remove key from queue: default/yourapp-688477cb9f-l2xcd 
 INFO[0031] attempting to remove key from queue: default/yourapp-688477cb9f-sdbh2 
 ```
+
+## Usage
+
+The included Helm chart can be used to install this controller and pull its image from the Docker Hub.
+
+```bash
+helm upgrade --install --create-namespace -n pod-time-controller pod-time-controller charts/pod-time-controller
+```
+
+Create a test pod, then add the `addtime` annotation so this controller will act on that pod and add the `timestamp` annotation.
+
+```bash
+kubectl run -n default --image nginx testpod
+```
+
+```bash
+kubectl annotate -n default pod/testpod addtime=true
+```
+
+Then use `kubectl logs --namespace pod-time-controller -l "app.kubernetes.io/name=pod-time-controller,app.kubernetes.io/instance=pod-time-controller"` to see the controller logs, which should show the `testpod` being annotated with the time stamp.
+
+Clean up the testpod and controller:
+
+```bash
+kubectl delete pod -n default testpod
+helm delete -n pod-time-controller pod-time-controller
+kubectl delete namespace pod-time-controller
+```
+
+## Building and Testing
+
+This repository includes a [Makefile](./Makefile) to ease common tasks.
+
+* `make test` - Format, vet, and test code
+* `make build` - Build locally including setting of the version (Git tag) and Git commit variables used by the `pod-time-controller -version` option
+* `make docker-build` - Build a local Docker image
+* `make docker-push` - Push a local Docker image to a registry (requires editing variables at the top of the Makefile)
 
 ## Future Updates and Considerations
 
