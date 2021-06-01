@@ -6,7 +6,7 @@ This Kubernetes controller
 * Acts on pods with an `addtime` annotation set to any value
 * Adds a `timestamp` annotation with the current date and time
 
-This is my foray into using Go for Kubernetes programming, and this project currently represents a balance of quality and proof-of-concept / "get something out the door." :)
+This is my foray into using Go for Kubernetes programming, and this project currently represents a [time boxed](https://en.wikipedia.org/wiki/Timeboxing) balance of quality and proof-of-concept / "get something out the door." :)
 
 So far I find the Kubernetes related Go packages are slower to learn, as there are abstractions upon abstractions, and many Go Interfaces passed between functions. For more details, see the "Approach" section below.
 
@@ -43,7 +43,7 @@ INFO[0031] attempting to remove key from queue: default/yourapp-688477cb9f-sdbh2
 
 ## Usage
 
-The included Helm chart can be used to install this controller and pull its image from the Docker Hub.
+The included Helm chart can be used to install this controller and pull its image from Docker Hub.
 
 ```bash
 helm upgrade --install --create-namespace -n pod-time-controller pod-time-controller charts/pod-time-controller
@@ -73,13 +73,14 @@ kubectl delete namespace pod-time-controller
 
 This repository includes a [Makefile](./Makefile) to ease common tasks.
 
-* `make test` - Format, vet, and test code
+* `make test` - Format, vet, and test code (although there are currently no tests)
 * `make build` - Build locally including setting of the version (Git tag) and Git commit variables used by the `pod-time-controller -version` option
 * `make docker-build` - Build a local Docker image
 * `make docker-push` - Push a local Docker image to a registry (requires editing variables at the top of the Makefile)
 
 ## Future Updates and Considerations
 
+* Definitely tests! This introduction to Kubernetes Go was a reasonable challenge, and I wasn't ready to tackle it with a test-first mindset.
 * Add liveness/readiness probes to the controller pod? These are best-practice for Kubernetes-hosted applications, but an answered HTTP request doesn't prove that controller pods are functional - I'm not sure what validating work a probe should do without being too expensive (like talking to the Kube API for every probe).
 * Add leader election so multiple pods can be run without causing undo work for the Kube API.
 * Switch [main.go](./cmd/main.go) to have less code and to instead call a CLI function, perhaps using [Cobra](https://github.com/spf13/cobra) and [Viper](https://github.com/spf13/viper) to process command-line options plus environment variables.
